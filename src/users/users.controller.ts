@@ -7,8 +7,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Controller('send-otp')
 export class AuthController {
   @Post()
-  sentOTP(@Body('message') message: string) {
-    return { response: `You sent: ${message}` };
+  sentOTP(@Body('phone') phone: string) {
+    return {
+      phone,
+      response: `OTP sent successfully to ${phone}`,
+    };
   }
 }
 
