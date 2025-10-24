@@ -1,25 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-
 @Controller('send-otp')
 export class AuthController {
+  constructor(private readonly usersService: UsersService) {}
   @Post()
-  sentOTP(@Body('phone') phone: string) {
+  async sentOTP(@Body('phoneNumber') phoneNumber: string) {
+    //add twillio code to send OTP
+    const result = await this.usersService.sendOtp(phoneNumber);
+    console.log('OTP sent result:', result);
     return {
-      phone,
-      response: `OTP sent successfully to ${phone}`,
+      phoneNumber: phoneNumber,
+      response: `OTP sent successfully to ${phoneNumber}`,
     };
   }
 }
 
-
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
