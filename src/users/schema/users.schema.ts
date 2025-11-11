@@ -5,31 +5,31 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, trim: true })
+  @Prop({ trim: true, default: 'New User' })
   name: string;
 
-  @Prop({ required: true, unique: true, trim: true })
+  @Prop({ unique: true, trim: true })
   username: string;
 
-  @Prop({ required: true, unique: true })
-  phone: number;
+  @Prop({ unique: true })
+  phoneNumber: number;
 
-  @Prop({ required: true, unique: true, trim: true })
+  @Prop({ unique: true, trim: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({})
   date_of_birth: Date;
 
-  @Prop({ required: true })
+  @Prop({})
   time_of_birth: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ trim: true })
   place_of_birth: string;
 
-  @Prop({ required: true, enum: ['Male', 'Female', 'Other'] })
+  @Prop({ enum: ['Male', 'Female', 'Other'] })
   gender: string;
 
-  @Prop({ required: true, minLength: 6 })
+  @Prop({ minLength: 6 })
   password: string;
 }
 

@@ -26,6 +26,23 @@ export class AuthController {
   }
 }
 
+@Controller('verify')
+export class VerifyController {
+  constructor(private readonly usersService: UsersService) {}
+  @Post()
+  async verifyOTP(
+    @Body('phoneNumber') phoneNumber: string,
+    @Body('code') code: string,
+  ) {
+    const result = await this.usersService.verifyOtp(phoneNumber, code);
+    console.log('called function verify otp######:', result);
+    return {
+      phoneNumber: phoneNumber,
+      response: `OTP verification status: ${result?.msg || 'verified'}`,
+    };
+  }
+}
+
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
