@@ -8,6 +8,7 @@ import { randomInt } from 'crypto';
 import { User, UserDocument } from './schema/users.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
 dotenv.config();
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UsersService {
   private readonly twilioClient: Twilio;
   private readonly verifyServiceSid: string;
   private readonly logger = new Logger(UsersService.name);
+  private readonly jwtService: JwtService;
 
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
     // Initialize Twilio client
@@ -76,8 +78,8 @@ export class UsersService {
         console.log('New user created with phone number:', phoneNumber);
         this.logger.log(`Created new user for ${phoneNumber}`);
         return { message: 'User created', user };
-      } else if (user) {
-        //then show user logged successfully
+      } else if (user && user.name !== 'New User') {
+        //then let user login in system with it real name and issue JWT token
         console.log(
           'User logged in successfully with phone number:',
           phoneNumber,
