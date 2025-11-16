@@ -24,11 +24,11 @@ export class UsersService {
   private readonly twilioClient: Twilio;
   private readonly verifyServiceSid: string;
   private readonly logger = new Logger(UsersService.name);
-  // private readonly jwtAuthService: JwtAuthService;
+  private readonly jwtAuthService: JwtAuthService;
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-      @Inject(forwardRef(() => JwtAuthService))
-  private readonly jwtAuthService: JwtAuthService
+      @Inject(forwardRef(() => UsersService))
+    jwtAuthService: JwtAuthService,
 ) {
     // Initialize Twilio client
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
