@@ -16,11 +16,11 @@ dotenv.config();
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '1h' },
     }),
     forwardRef(() => UsersModule),
   ],
   providers: [JwtAuthService, JwtStrategy],
   exports: [JwtAuthService],
 })
-export class JwtAuthModule {}
+export class JwtAuthModule { }
