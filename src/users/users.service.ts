@@ -27,9 +27,9 @@ export class UsersService {
   // private readonly jwtAuthService: JwtAuthService;
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-      @Inject(forwardRef(() => JwtAuthService))
-  private readonly jwtAuthService: JwtAuthService
-) {
+    @Inject(forwardRef(() => JwtAuthService))
+    private readonly jwtAuthService: JwtAuthService
+  ) {
     // Initialize Twilio client
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -95,19 +95,29 @@ export class UsersService {
         //then let user login in system with it real name and issue JWT token
         console.log(
           'User logged in successfully with phone number:',
-         {user}
+          { user }
         );
       }
       const tokenObj = await this.jwtAuthService.createtokenForUser(user);
-        console.log({tokenObj}, 'tokenObj');
-        return {
-          message: 'OK',
-          user,
-          token: tokenObj.accessToken,
-          expiresIn: tokenObj.expiresIn,
-        };
+      console.log({ tokenObj }, 'tokenObj');
+      return {
+        message: 'OK',
+        user,
+        token: tokenObj.accessToken,
+        expiresIn: tokenObj.expiresIn,
+      };
     }
   }
+
+  async updateUserById(id: string, updateUserDto: UpdateUserDto) {
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, { $set: updateUserDto }, { new: true, runValidators: true })
+      .exec();
+    console.log("Inside User Service's update user function", updated)
+
+    return updated;
+  }
+
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
@@ -116,13 +126,14 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: any) {
+    const findUserInfo = await this.userModel.findById(id).exec();
+    console.log('User found with ID:', findUserInfo);
+
+    return findUserInfo;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+
 
   remove(id: number) {
     return `This action removes a #${id} user`;

@@ -7,7 +7,11 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
   UseGuards,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,7 +20,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Controller('send-otp')
 export class AuthController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
   @Post()
   async sentOTP(@Body('phoneNumber') phoneNumber: string) {
     //add twillio code to send OTP
@@ -31,7 +35,7 @@ export class AuthController {
 
 @Controller('verify')
 export class VerifyController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
   @Post()
   async verifyOTP(
     @Body('phoneNumber') phoneNumber: string,
@@ -48,7 +52,7 @@ export class VerifyController {
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -62,13 +66,44 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const foundUserinfo = await this.usersService.findOne(id);
+    console.log(foundUserinfo, 'user Found');
+    return foundUserinfo;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @UseGuards(AuthGuard('jwt'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Request() req: any,
+  ) {
+    // req.user can be the user document or payload depending on your strategy
+    const sessionUser = req.user;
+
+    if (!sessionUser) {
+      throw new BadRequestException('No authenticated user found in request.');
+    }
+
+    const sessionUserId = sessionUser._id
+      ? sessionUser._id.toString()
+      : sessionUser.sub?.toString();
+
+    // allow update only if same user or admin role
+    const isOwner = sessionUserId === id;
+    const isAdmin = sessionUser.role && sessionUser.role === 'admin'; // adapt to your roles
+
+    // if (!isOwner && !isAdmin) {
+    //   throw new ForbiddenException('You are not allowed to update this user.');
+    // }
+
+    const updated = this.usersService.updateUserById(id, updateUserDto);
+    console.log(' user updated ');
+
+    if (!updated) throw new NotFoundException('User not found');
+    const { ...safe } = updated;
+    return { message: 'User updated', user: safe };
   }
 
   @Delete(':id')
